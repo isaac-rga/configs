@@ -1,0 +1,110 @@
+alias jka="/home/isaac/JA/GameData/openjk.x86_64"
+alias startKraken="cd ~/Projects/srenvio/shipkraken && clear && rails s"
+alias startKrakenWorker="cd ~/Projects/srenvio/shipkraken && clear && rake resque:work"
+alias awsNext="ssh -i /home/isaac/Projects/srenvio/krakens.pem admin@52.26.26.182"
+alias awsLegacy="ssh -i /home/isaac/Projects/skydrop/acamari.pem hmalik@35.164.195.136 -p 60"
+alias awsStaging="ssh -i /home/isaac/Projects/skydrop/skydrop.pem ubuntu@35.165.118.69"
+alias awsStp="ssh -i /home/isaac/Projects/srenvio/krakens.pem ec2-user@ec2-34-219-127-225.us-west-2.compute.amazonaws.com"
+alias awsEnvia="ssh -i /home/isaac/Projects/srenvio/krakens.pem ec2-user@54.200.63.139"
+alias awsNotifications="ssh -i /home/isaac/Projects/srenvio/krakens.pem ubuntu@ec2-54-200-241-76.us-west-2.compute.amazonaws.com"
+
+
+#alias cat="ccat"
+alias reload!="source ~/.zshrc"
+alias glg="git log --all --graph --decorate --oneline"
+alias gadd="git status -s | fzy | sed 's/^...//' | xargs git add"
+alias shipkraken_db="pgcli postgres://postgres@localhost:5432/shipkraken_development"
+alias radar_db="pgcli postgres://ud4mu73jcuhu2g:p684080334880b82de7cee19667b89517e08edd4a97fc31658ebe8b4dc676395a@ec2-34-233-47-152.compute-1.amazonaws.com:5432/d76i4djvu3a386"
+
+function initPostgres () {
+  docker run \
+    --name "local-postgres" \
+    -e POSTGRES_PASSWORD=password \
+    -v "$HOME/.docker_storage/postgresql":"/var/lib/postgresql/data" \
+    -p 0.0.0.0:5432:5432 \
+    -d \
+    postgres:13
+}
+
+function initMongo () {
+  docker run \
+    --name "local-mongo" \
+    -v "$HOME/.docker_storage/mongodb":"/data/db" \
+    -p 0.0.0.0:27017:27017 \
+    -d \
+    mongo:4.0.13
+}
+
+function initRedis () {
+docker run \
+  --name "local-redis" \
+  -v "$HOME/.docker_storage/redis":"/data" \
+  -p 0.0.0.0:6379:6379 \
+  -d \
+  redis:6
+}
+
+function initMysql () {
+  docker run \
+    --name "local-mysql" \
+    -v "$HOME/.docker_storage/mysql":"/var/lib/mysql" \
+    -e MYSQL_ROOT_PASSWORD=root \
+    -p 0.0.0.0:3306:3306 \
+    -d \
+    mysql:5.7.22 mysqld --default-authentication-plugin=mysql_native_password
+}
+
+function radar() {
+  tmux attach -t 'RADAR' || start_radar
+}
+
+function start_radar () {
+  tmux new-session -d -A -s "RADAR" -n 'WEBAPP' -c "/home/isaac/Projects/skydropx/radar_frontend"\; \
+    split-window -h -c "/home/isaac/Projects/skydropx/radar_frontend" \; \
+    send-keys 'npm run dev' C-m \; && \
+  tmux new-window -t RADAR -n 'API' 'cd /home/isaac/Projects/skydropx/dispatcher_backend' \; \
+    split-window -v -c "/home/isaac/Projects/skydropx/dispatcher_backend" \; \
+    send-keys 'rvm use && clear' C-m \; \
+    split-window -v -c "/home/isaac/Projects/skydropx/dispatcher_backend/" \; \
+    send-keys 'rvm use && rails s' C-m \; \
+    split-window -h -c "/home/isaac/Projects/skydropx/dispatcher_backend/" \; \
+    send-keys 'rvm use && sidekiq' C-m \; && \
+  tmux attach
+}
+
+function labels() {
+  tmux attach -t 'LABELS' || start_labels
+}
+
+function start_labels () {
+  tmux new-session -d -A -s "LABELS" -n 'APP' -c "/home/isaac/Projects/skydropx/shipkraken/"\; \
+    send-keys 'rvm use && clear' C-m \; \
+    split-window -v -c "/home/isaac/Projects/skydropx/shipkraken/" \; \
+    send-keys 'rvm use && rails s' C-m \; \
+    split-window -h -c "/home/isaac/Projects/skydropx/shipkraken/" \; \
+    send-keys 'rvm use && rake resque:work' C-m \; && \
+  tmux attach
+}
+
+function listify() {
+  tmux attach -t 'LISTIFY' || start_listify
+}
+
+function start_listify () {
+  tmux new-session -d -A -s "LISTIFY" -n 'WEBAPP' -c "$HOME/Development/fulfillment/listify-webapp"\; \
+    split-window -h -c "$HOME/Development/fulfillment/listify-webapp" \; \
+    send-keys 'npm run dev' C-m \; && \
+  tmux new-window -t LISTIFY -n 'API' 'cd $HOME/Development/fulfillment/listify-service' \; \
+    split-window -v -c "$HOME/Development/fulfillment/listify-service" \; \
+    send-keys 'rvm use && clear' C-m \; \
+    split-window -h -c "$HOME/Development/fulfillment/listify-service" \; \
+    send-keys 'rvm use && rails s' C-m \; \
+    split-window -v -c "$HOME/Development/fulfillment/listify-service" \; \
+    send-keys 'rvm use && sidekiq' C-m \; &&\
+  tmux attach
+}
+
+function serveLegacy () {
+  docker start local-mysql;
+  tmux  new-session -s "Legacy server" "cd ~/Projects/skydrop/legacy && rvm use && clear && rails s --port=3030 --binding=127.0.0.1" \;
+}
