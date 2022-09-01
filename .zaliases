@@ -1,20 +1,11 @@
 alias jka="/home/isaac/JA/GameData/openjk.x86_64"
-alias startKraken="cd ~/Projects/srenvio/shipkraken && clear && rails s"
-alias startKrakenWorker="cd ~/Projects/srenvio/shipkraken && clear && rake resque:work"
-alias awsNext="ssh -i /home/isaac/Projects/srenvio/krakens.pem admin@52.26.26.182"
-alias awsLegacy="ssh -i /home/isaac/Projects/skydrop/acamari.pem hmalik@35.164.195.136 -p 60"
-alias awsStaging="ssh -i /home/isaac/Projects/skydrop/skydrop.pem ubuntu@35.165.118.69"
-alias awsStp="ssh -i /home/isaac/Projects/srenvio/krakens.pem ec2-user@ec2-34-219-127-225.us-west-2.compute.amazonaws.com"
-alias awsEnvia="ssh -i /home/isaac/Projects/srenvio/krakens.pem ec2-user@54.200.63.139"
-alias awsNotifications="ssh -i /home/isaac/Projects/srenvio/krakens.pem ubuntu@ec2-54-200-241-76.us-west-2.compute.amazonaws.com"
 
 
 #alias cat="ccat"
 alias reload!="source ~/.zshrc"
 alias glg="git log --all --graph --decorate --oneline"
 alias gadd="git status -s | fzy | sed 's/^...//' | xargs git add"
-alias shipkraken_db="pgcli postgres://postgres@localhost:5432/shipkraken_development"
-alias radar_db="pgcli postgres://ud4mu73jcuhu2g:p684080334880b82de7cee19667b89517e08edd4a97fc31658ebe8b4dc676395a@ec2-34-233-47-152.compute-1.amazonaws.com:5432/d76i4djvu3a386"
+
 
 function initPostgres () {
   docker run \
